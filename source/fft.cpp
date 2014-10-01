@@ -10,6 +10,11 @@
 #include <math.h>
 #include "../include/fft.h"
 
+#include <cmath>
+#include <complex>
+#include "revbinpermute.h"
+#include "fhtloc2.h"
+
 //#include <complex>
 //#include "complex.h"
 
