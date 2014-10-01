@@ -1,39 +1,51 @@
-This is Sonic, 0.1 originally built by members of The Philadelphia Game Lab.
+# Sonic: A 3D Audio Library
+This is Sonic, 0.1 originally built by members of [The Philadelphia Game Lab](http://philadelphiagamelab.org/).
 
 Sonic is a library of C++ routines for performing real-time binaural audio
-processing on mobile devices. The current version supports only iOS devices. 
+processing on mobile devices. The current version supports only iOS devices.
 
-The include/ directory contains header files for the source code.
+### Layout
 
-The source/ directory contains the source code for library itself. Function definitions of functions declared in the include/ directory are included here.
+`include/`	Header files for the source code.
 
-The iOS/ directory contains files and functions necessary to interface with
-the iOS system calls.
+`source/` 	Source code for library itself. Function definitions of functions declared in the include/ directory are included here.
 
-The MIT_HRTF_Library/ directory contains files and functions for the digital
-signal processing of the audio files, required for the audio processing.
-This code is available under the MIT license as specified here:
-    http://opensource.org/licenses/MIT
+`iOS/` 		Files and functions necessary to interface with iOS system calls.
 
-    The MIT License (MIT)
+`MIT\_HRTF\_Library/` Files and functions for audio processing. This code is available under the MIT license as specified [here](
+    http://opensource.org/licenses/MIT).
+    
+### Demo iOS applications
 
-    Copyright (c) 2014 Philadelphia Game Lab
+[SonicDemo](https://github.com/philadelphiagamelab/SonicDemo): A starting point for your Sonic app.
 
-    Permission is hereby granted, free of charge, to any person obtaining a copy
-    of this software and associated documentation files (the "Software"), to deal
-    in the Software without restriction, including without limitation the rights
-    to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-    copies of the Software, and to permit persons to whom the Software is
-    furnished to do so, subject to the following conditions:
+[SteerAudio](https://github.com/philadelphiagamelab/SteerAudio): Use gyroscope input to shape sounds
 
-    The above copyright notice and this permission notice shall be included in
-    all copies or substantial portions of the Software.
+[Knobs](https://github.com/philadelphiagamelab/knobs): Turn knobs to move an audio object around in 3D space.
 
-    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-    THE SOFTWARE.
+### Including Sonic in your own iOS app
+
+We are currently working on compiling Sonic into a static library. In the meantime, if you would like to import the source into your iOS project, either fork [SonicDemo](https://github.com/philadelphiagamelab/SonicDemo) or consult the [Sonic Setup Guide](SETUP.md) for manual setup instructions.
+
+### Contributing to Sonic
+
+If you would like to make changes to the Sonic library, first fork it. Then you can either build your own testing application around that fork or use one of our existing demo apps. If you prefer to do the latter, fork the demo app of your choice then change its Sonic submodule to point to your Sonic fork rather than to the master repo:
+
+		$> git clone --recursive https://github.com/<path/to/demoapp/fork>.git
+		$> cd YourDemoAppFork
+		YourDemoAppFork$> vim .gitmodules
+		# replace the Sonic url with your Sonic fork's url
+		YourDemoAppFork$> git submodule sync
+		YourDemoAppFork$> git submodule foreach git pull --rebase
+
+Now you can modify both the Sonic library and the application it's included in and push changes to their respective forks. Note the difference between your demo app fork--which is your editable copy of one of the Sonic demo apps--and your Sonic fork--which is your editable copy of the Sonic library itself. For more help on working with git submodules, consult the [submodule documentation](http://git-scm.com/book/en/Git-Tools-Submodules).
+
+### More info
+
+For more information, check out [the Sonic project webpage](http://sonic.philadelphiagamelab.org/).
+
+
+
+
+    
 
