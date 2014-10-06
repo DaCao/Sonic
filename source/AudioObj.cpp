@@ -1,4 +1,5 @@
 #include "../include/AudioObj.h"
+#include "../include/complextype.h"
 //#include <iostream>
 
 Location AudioObj::getLocation () const {
@@ -49,7 +50,7 @@ void AudioObj::setRepeat(bool rep) {
 }
 
 
-bool AudioObj::fillAudioData (complex* target, unsigned int length) {
+bool AudioObj::fillAudioData (Complex* target, unsigned int length) {
     
     if(circBuff.readSizeRemaining() < length) {
                 return false;
@@ -70,7 +71,7 @@ void AudioObj::writeCircBuff() {
             return;
         }
         
-        circBuff.write(wavObject.complexTempData, length);
+        circBuff.write(wavObject.ComplexTempData, length);
     }
     
 }

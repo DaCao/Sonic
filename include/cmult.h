@@ -75,7 +75,7 @@ static inline void cmult(double c, double s,
                          Complex x, Complex y,
                          Complex &u, Complex &v)
 // {u,v} <--| {x*c-y*s, x*s+y*c}
-// used in generated complex fhts
+// used in generated complex2 fhts
 {
     u = x * c - y * s;
     v = y * c + x * s;
@@ -86,7 +86,7 @@ static inline void cmult(Complex c, Complex s,
                          Complex x, Complex y,
                          Complex &u, Complex &v)
 // {u,v} <--| {x*c-y*s, x*s+y*c}
-// used in generated complex fhts
+// used in generated complex2 fhts
 {
     u = x * c - y * s;
     v = y * c + x * s;
@@ -109,7 +109,7 @@ static inline void cmult_inv(double c, double s,
                              Complex &u, Complex &v)
 // {u,v} <--| {x*c+y*s, -x*s+y*c}
 // same as cmult(c, -s, x, y, u, v)
-// used in generated complex fhts
+// used in generated complex2 fhts
 {
     u = x * c + y * s;
     v = y * c - x * s;
@@ -121,7 +121,7 @@ static inline void cmult_inv(Complex c, Complex s,
                              Complex &u, Complex &v)
 // {u,v} <--| {x*c+y*s, -x*s+y*c}
 // same as cmult(c, -s, x, y, u, v)
-// used in generated complex fhts
+// used in generated complex2 fhts
 {
     u = x * c + y * s;
     v = y * c - x * s;

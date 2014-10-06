@@ -9,7 +9,7 @@
 #include "fht.h"  // fht_dif_core(), fht_dit_core()
 #include "hartleyshift.h"  // hartley_shift_05()
 #include "sumdiff.h"
-#include "revbinpermute.h"
+//#include "revbinpermute.h" // to be recovered
 #include "shortfhtdifcore.h"
 #include "shortfhtditcore.h"
 
@@ -100,24 +100,28 @@ void fht_loc_dit2_core(Type *f, ulong ldn)
 // -------------------------
 
 
-//: inlines give default implementations:
+// to be recovered below:
 
-template <typename Type>
-inline void fht_loc(Type *f, ulong ldn)
-{
-    fht_loc_dif2_core(f, ldn);
-    revbin_permute(f, 1UL<<ldn);
-}
-// -------------------------
+////: inlines give default implementations:
+//
+//template <typename Type>
+//inline void fht_loc(Type *f, ulong ldn)
+//{
+//    fht_loc_dif2_core(f, ldn);
+//    revbin_permute(f, 1UL<<ldn);
+//}
+//// -------------------------
+//
+//template <typename Type>
+//inline void fht0_loc(Type *f, ulong ldn)
+//{
+//    // todo: no special version for zero padded data yet:
+//    fht_loc_dif2_core(f, ldn);
+//    revbin_permute(f, 1UL<<ldn);
+//}
+//// -------------------------
 
-template <typename Type>
-inline void fht0_loc(Type *f, ulong ldn)
-{
-    // todo: no special version for zero padded data yet:
-    fht_loc_dif2_core(f, ldn);
-    revbin_permute(f, 1UL<<ldn);
-}
-// -------------------------
+// to be recovered above.
 
 #undef USE_TRIG_REC
 

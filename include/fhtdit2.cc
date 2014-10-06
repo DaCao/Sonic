@@ -6,7 +6,7 @@
 #include "fxttypes.h"
 #include "complextype.h"
 #include "sincos.h"
-#include "revbinpermute.h"
+#include "revbinpermute.h" //to be recovered
 #include "sumdiff.h"
 
 #include <cmath>  // M_PI

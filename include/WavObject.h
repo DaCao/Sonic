@@ -10,9 +10,14 @@
 #define WAVOBJECT_H
 
 #include <string>
-#include "complex.h"
+//#include "complex.h"
+#include "complextype.h"
+#include <complex>
+#include <cmath>
 #include <math.h>
 #include <iostream>
+
+//using std::complex;
 
 class WavObject {
     
@@ -65,20 +70,20 @@ public:
     CHUNK_ID chunk_id;
     
     short *shortTempData;
-    complex *complexTempData;
+    Complex *ComplexTempData;
     
     
-    WavObject (unsigned int size,const std::string wavFileName) : shortTempData(new short[size]), complexTempData(new complex[size]) {
+    WavObject (unsigned int size,const std::string wavFileName) : shortTempData(new short[size]), ComplexTempData(new Complex[size]) {
         extractWavHeader(wavFileName);
     }
     
-    complex *loadCmpWavData(const std::string fname, long *size, int *smpFreq, int *bitDepth, int *channels);
+    Complex *loadCmpWavData(const std::string fname, long *size, int *smpFreq, int *bitDepth, int *channels);
     void extractWavHeader (const std::string fname);
     bool loadMoreData (unsigned int, bool);
     
     ~WavObject () {
         delete[] shortTempData;
-        delete[] complexTempData;
+        delete[] ComplexTempData;
         if (soundFile)
             fclose(soundFile);
     }

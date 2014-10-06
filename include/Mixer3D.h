@@ -3,6 +3,7 @@
 #include "AudioObj.h"
 #include "World.h"
 #include "mit_hrtf_lib.h"
+#include "complextype.h"
 
 #ifndef MIXER3D_H
 #define MIXER3D_H
@@ -39,10 +40,10 @@ private:
 	/**
 	Pre: Azimuth must be an angle between -180 and 180. Elevation must be between -90 and 90. The sample rate must be either 44100, 48000, 88200, or 96000 
 	 	 KHz. leftFilter and rightFilter must be pre-allocated according to the number of taps for each sample rate: 128, 140, 256, or 279.
-	Post: leftFilter and rightFilter will be filled with complex data in the frequency domain which represent the HRTF filter at a specified Azimuth 
+	Post: leftFilter and rightFilter will be filled with Complex data in the frequency domain which represent the HRTF filter at a specified Azimuth 
 		  and Elevation.
 	*/
-	int loadHRTF(int* pAzimuth, int* pElevation, unsigned int samplerate, unsigned int diffused, complex *&leftFilter, complex *&rightFilter);
+	int loadHRTF(int* pAzimuth, int* pElevation, unsigned int samplerate, unsigned int diffused, Complex *&leftFilter, Complex *&rightFilter);
 	
 	/**
 	Pre: The input and filter can be any size relative to each other, as this  method will perform self-contained zero-padding. As such, NFFT must be a 
@@ -54,7 +55,7 @@ private:
 		  The output size will be NFFT samples. There is a side effect of fInput and fFilter being populated with the frequency domain data which was used for 
 		  the convolution.
 	*/
-	void convolution(complex *input, complex *filter, complex *output, long nSig, long nFil, long nFFT);
+	void convolution(Complex *input, Complex *filter, Complex *output, long nSig, long nFil, long nFFT);
 	
 	/**
 	Pre: Similar requirements to the normal convolution(), extended to left and right versions of filter and output. As usual, all containers must be 
@@ -62,7 +63,7 @@ private:
 	Post: The method will call convolution() twice for both left and right audio data, using the leftFilter and rightFilter and storing the results in
 		  leftOutput and rightOutputThis method will propagate the fInput/fFilter population side effect of convolution().
 	*/
-	void stereoConvolution(complex *input, complex *leftFilter, complex *rightFilter, complex *leftOutput, complex *rightOutput, long nSig, long nFil, long nFFT);
+	void stereoConvolution(Complex *input, Complex *leftFilter, Complex *rightFilter, Complex *leftOutput, Complex *rightOutput, long nSig, long nFil, long nFFT);
 	
     /**
     Re-computes and stores elevation and azimuth angles for all
@@ -89,10 +90,10 @@ private:
     int *prevAzimuths, *prevElevations,
     	*azimuths, *elevations;
     
-	complex	*inputAO, 					 	//Holds the current input of each audio object.
+	Complex	*inputAO, 					 	//Holds the current input of each audio object.
 			*overlapInput,					//Holds the input of the last iteration in case the filter changed and the tail needs recalculation.
     		*fInput, *fFilter,				//Data arrays to hold frequency domain representation of an input and filter. Used in convolution().
-			**complexLeftFilter, **complexRightFilter,			 	//Holds the complex datatype versions of the current filter.
+			**ComplexLeftFilter, **ComplexRightFilter,			 	//Holds the Complex datatype versions of the current filter.
 			**outputLeft, **outputRight, 	//Holds the output of each current input with the current filter.
 			**overlapLeft,**overlapRight;   //Holds the second half of each 2*bufferSize convolution for next iteration.
 };

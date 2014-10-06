@@ -3,14 +3,16 @@
 #include "../include/World.h"
 #include "../include/fft.h"
 #include "../include/mit_hrtf_lib.h"
+#include "../include/complextype.h"
+
 
 Mixer3D::Mixer3D(int bufSize, int smpRate, int bitD, World *w) :
 myWorld(w), bufferSize(bufSize), sampleRate(smpRate), bitDepth(bitD), player(myWorld->getPlayer())
 {
-    inputAO = new complex[2*bufferSize];
-    overlapInput = new complex[2 * bufferSize];
-    fInput = new complex[2 * bufferSize];
-    fFilter = new complex[2 * bufferSize];
+    inputAO = new Complex[2*bufferSize];
+    overlapInput = new Complex[2 * bufferSize];
+    fInput = new Complex[2 * bufferSize];
+    fFilter = new Complex[2 * bufferSize];
     
     azimuths = new int[World::MAX_OBJ];
     elevations = new int[World::MAX_OBJ];
@@ -19,25 +21,25 @@ myWorld(w), bufferSize(bufSize), sampleRate(smpRate), bitDepth(bitD), player(myW
 
     updateAngles(); // initialize azimuths and elevations
 
-    outputLeft = new complex*[World::MAX_OBJ];
-    outputRight = new complex*[World::MAX_OBJ];
-    overlapLeft = new complex*[World::MAX_OBJ];
-    overlapRight = new complex*[World::MAX_OBJ];
+    outputLeft = new Complex*[World::MAX_OBJ];
+    outputRight = new Complex*[World::MAX_OBJ];
+    overlapLeft = new Complex*[World::MAX_OBJ];
+    overlapRight = new Complex*[World::MAX_OBJ];
 
     leftFilter = new short[2 * bufferSize];
     rightFilter = new short[2 * bufferSize];
-    complexLeftFilter = new complex*[World::MAX_OBJ];
-    complexRightFilter = new complex*[World::MAX_OBJ];
+    ComplexLeftFilter = new Complex*[World::MAX_OBJ];
+    ComplexRightFilter = new Complex*[World::MAX_OBJ];
 
     for (int i = 0; i < World::MAX_OBJ; i++)
     {
         // TODO: Should we initialize filter values?
-        overlapLeft[i] = new complex[bufferSize];
-        overlapRight[i] = new complex[bufferSize];
-        outputLeft[i] = new complex[2*bufferSize];
-        outputRight[i] = new complex[2*bufferSize];
-        complexLeftFilter[i] = new complex[2*bufferSize];
-        complexRightFilter[i] = new complex[2*bufferSize];
+        overlapLeft[i] = new Complex[bufferSize];
+        overlapRight[i] = new Complex[bufferSize];
+        outputLeft[i] = new Complex[2*bufferSize];
+        outputRight[i] = new Complex[2*bufferSize];
+        ComplexLeftFilter[i] = new Complex[2*bufferSize];
+        ComplexRightFilter[i] = new Complex[2*bufferSize];
         
         // TODO: Is there a more efficient way to know which objects
         // have changed position relative to the player?
@@ -55,8 +57,8 @@ Mixer3D::~Mixer3D()
     delete [] outputLeft;
     delete [] leftFilter;
     delete [] rightFilter;
-    delete [] complexLeftFilter;
-    delete [] complexRightFilter;
+    delete [] ComplexLeftFilter;
+    delete [] ComplexRightFilter;
     delete [] overlapLeft;
     delete [] overlapRight;
     delete [] overlapInput;
@@ -79,7 +81,7 @@ bool Mixer3D::isPowerOfTwo(int x) {
     return !(x == 0) && !(x & (x - 1));
 }
 
-int Mixer3D::loadHRTF(int* pAzimuth, int* pElevation, unsigned int samplerate, unsigned int diffused, complex *&leftFilterIn, complex *&rightFilterIn)
+int Mixer3D::loadHRTF(int* pAzimuth, int* pElevation, unsigned int samplerate, unsigned int diffused, Complex *&leftFilterIn, Complex *&rightFilterIn)
 {
     int size = mit_hrtf_get(pAzimuth, pElevation, samplerate, diffused, leftFilter, rightFilter);
 
@@ -91,7 +93,7 @@ int Mixer3D::loadHRTF(int* pAzimuth, int* pElevation, unsigned int samplerate, u
 
     return size;
 }
-void Mixer3D::convolution(complex *input, complex *filter, complex *output, long nSig, long nFil, long nFFT) {
+void Mixer3D::convolution(Complex *input, Complex *filter, Complex *output, long nSig, long nFil, long nFFT) {
 
 	if (input == NULL || filter == NULL) {
 		throw invalid_argument("Input and Filter must be non-NULL.");
@@ -112,7 +114,7 @@ void Mixer3D::convolution(complex *input, complex *filter, complex *output, long
 	CFFT::Inverse(output, (unsigned int)nFFT);
 }
 
-void Mixer3D::stereoConvolution(complex *input, complex *leftFilter, complex *rightFilter, complex *leftOutput, complex *rightOutput, long nSIG, long nFIL, long nFFT)
+void Mixer3D::stereoConvolution(Complex *input, Complex *leftFilter, Complex *rightFilter, Complex *leftOutput, Complex *rightOutput, long nSIG, long nFIL, long nFFT)
 {
     // TODO: Modify parameter name, input is a data member
     convolution(input, leftFilter, leftOutput, nSIG, nFIL, nFFT);
@@ -160,12 +162,12 @@ void Mixer3D::performMix(short *ioDataLeft, short *ioDataRight)
         if (azimuths[i] != prevAzimuths[i] ||
            elevations[i] != prevElevations[i]) {
             // object location relative to player has changed, so fetch a new filter
-            filterLength = loadHRTF(&azimuths[i], &elevations[i], sampleRate, 1, complexLeftFilter[i], complexRightFilter[i]);
+            filterLength = loadHRTF(&azimuths[i], &elevations[i], sampleRate, 1, ComplexLeftFilter[i], ComplexRightFilter[i]);
             
             // zero pad
             for (int j = filterLength; j < 2 * bufferSize; j++) {
-                complexLeftFilter[i][j] = 0;
-                complexRightFilter[i][j] = 0;
+                ComplexLeftFilter[i][j] = 0;
+                ComplexRightFilter[i][j] = 0;
             }
             
             if (azimuths[i] < 0) {
@@ -174,7 +176,8 @@ void Mixer3D::performMix(short *ioDataLeft, short *ioDataRight)
             
             
             //Since the filter changed, we perform a convolution on the old input with the new filter and pull out its tail.
-            stereoConvolution(overlapInput, complexLeftFilter[i], complexRightFilter[i], outputLeft[i], outputRight[i], bufferSize, filterLength, 2 * bufferSize);
+            
+            stereoConvolution(overlapInput, ComplexLeftFilter[i], ComplexRightFilter[i], outputLeft[i], outputRight[i], bufferSize, filterLength, 2 * bufferSize);
         
             // update the overlap part for the next iteration
             for (int j = 0; j < bufferSize; j++) {
@@ -184,12 +187,12 @@ void Mixer3D::performMix(short *ioDataLeft, short *ioDataRight)
         }
         
         //Perform the convolution of the current input and current filter.
-        stereoConvolution(inputAO, complexLeftFilter[i], complexRightFilter[i], outputLeft[i], outputRight[i], bufferSize, filterLength, 2 * bufferSize);
+        stereoConvolution(inputAO, ComplexLeftFilter[i], ComplexRightFilter[i], outputLeft[i], outputRight[i], bufferSize, filterLength, 2 * bufferSize);
         
         
         for (int j = 0; j < bufferSize; j++) {
-            ioDataLeft[j] +=  (short((outputLeft[i][j].re())/2 + (overlapLeft[i][j].re())/2))/myWorld->getNumObj();
-            ioDataRight[j] += (short((outputRight[i][j].re())/2 + (overlapRight[i][j].re())/2))/myWorld->getNumObj();
+            ioDataLeft[j] +=  (short((outputLeft[i][j].real())/2 + (overlapLeft[i][j].real())/2))/myWorld->getNumObj();
+            ioDataRight[j] += (short((outputRight[i][j].real())/2 + (overlapRight[i][j].real())/2))/myWorld->getNumObj();
         }
         
   
@@ -198,8 +201,8 @@ void Mixer3D::performMix(short *ioDataLeft, short *ioDataRight)
         //to divide by the number of audio objects to ensure no clipping.
         for (int j = 0; j < bufferSize; j++)
         {
-            ioDataLeft[j]  += (short)( (outputLeft[i][j].re() + overlapLeft[i][j].re()) / 2*myWorld->getNumObj() );
-            ioDataRight[j] += (short)( (outputRight[i][j].re() + overlapRight[i][j].re()) / 2*myWorld->getNumObj() );    
+            ioDataLeft[j]  += (short)( (outputLeft[i][j].real() + overlapLeft[i][j].real()) / 2*myWorld->getNumObj() );
+            ioDataRight[j] += (short)( (outputRight[i][j].real() + overlapRight[i][j].real()) / 2*myWorld->getNumObj() );    
         }
         
         //Updating the overlapInput for the next iteration for the correpsonding obejct

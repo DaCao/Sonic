@@ -8,7 +8,7 @@
 #include "sumdiff.h"
 #include "constants.h"  // COS_1_PI_8, SIN_1_PI_8
 #include "sincos.h"
-#include "revbinpermute.h"
+//#include "revbinpermute.h"  // to be recovered
 
 #include <cmath>  // M_PI, M_SQRT1_2
 
@@ -232,31 +232,33 @@ fht_dit_core(double *f, ulong ldn)
 // -------------------------
 
 
-void
-fht_dit(double *f, ulong ldn)
-// Fast Hartley Transform.
-// Split-radix decimation in time (DIT) algorithm.
-// ldn := base-2 logarithm of the array length.
-{
-    if ( ldn<=2 )
-    {
-        if ( ldn==1 )  // two point fht
-        {
-            sumdiff(f[0], f[1]);
-        }
-        else if ( ldn==2 )  // four point fht
-        {
-            double f0, f1, f2, f3;
-            sumdiff(f[0], f[2], f0, f1);
-            sumdiff(f[1], f[3], f2, f3);
-            sumdiff(f0, f2, f[0], f[2]);
-            sumdiff(f1, f3, f[1], f[3]);
-        }
+// to be recovered below
 
-        return;
-    }
-
-    revbin_permute(f, 1UL<<ldn);
-    fht_dit_core(f, ldn);
-}
-// -------------------------
+//void
+//fht_dit(double *f, ulong ldn)
+//// Fast Hartley Transform.
+//// Split-radix decimation in time (DIT) algorithm.
+//// ldn := base-2 logarithm of the array length.
+//{
+//    if ( ldn<=2 )
+//    {
+//        if ( ldn==1 )  // two point fht
+//        {
+//            sumdiff(f[0], f[1]);
+//        }
+//        else if ( ldn==2 )  // four point fht
+//        {
+//            double f0, f1, f2, f3;
+//            sumdiff(f[0], f[2], f0, f1);
+//            sumdiff(f[1], f[3], f2, f3);
+//            sumdiff(f0, f2, f[0], f[2]);
+//            sumdiff(f1, f3, f[1], f[3]);
+//        }
+//
+//        return;
+//    }
+//
+//    revbin_permute(f, 1UL<<ldn);
+//    fht_dit_core(f, ldn);
+//}
+//// -------------------------

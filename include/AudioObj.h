@@ -4,7 +4,7 @@
 #include <stdexcept>
 #include "location.h"
 #include "velocity.h"
-#include "complex.h"
+#include "complextype.h"
 #include "CircBuff.h"
 #include "WavObject.h"
 
@@ -24,12 +24,12 @@ class AudioObj {
     float volume;
     bool repeat;
     
-    CircBuff<complex> circBuff;
+    CircBuff<Complex> circBuff;
     WavObject wavObject;
     bool toLoadMoreData;
 
     void writeCircBuff (void);
-    bool fillAudioData(complex *, unsigned int);
+    bool fillAudioData(Complex *, unsigned int);
 
     
     public:
@@ -38,13 +38,13 @@ class AudioObj {
 	// Creates a new audio object at the world's origin, {0,0,0}.
     AudioObj(const std::string wavFileName) : active(true), volume(1), repeat(true), circBuff(BUFFER_CAPACITY), wavObject(BUFFER_CAPACITY, wavFileName), toLoadMoreData(true) {
         wavObject.loadMoreData(32768, repeat);
-        circBuff.write(wavObject.complexTempData, 32768);
+        circBuff.write(wavObject.ComplexTempData, 32768);
         }
 
 	// Creates a new audio object at the location specified by the parameter.
     AudioObj(const Location& loc, const Velocity& vel, const std::string wavFileName) : location(loc), velocity(vel), active(true), volume(1), repeat(true), circBuff(BUFFER_CAPACITY), wavObject(BUFFER_CAPACITY, wavFileName), toLoadMoreData(true) {
         wavObject.loadMoreData(32768, repeat);
-        circBuff.write(wavObject.complexTempData, 32768);
+        circBuff.write(wavObject.ComplexTempData, 32768);
     }
     
     ~AudioObj () { }
