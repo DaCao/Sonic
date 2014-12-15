@@ -6,9 +6,9 @@
 // see the file COPYING.txt in the main directory.
 
 #include "shortrevbinpermute.h"
-#include "bits/revbin-upd.h"
-#include "bits/revbin.h"
-#include "bits/bit2pow.h"
+#include "revbin-upd.h"
+#include "revbin.h"
+#include "bit2pow.h"
 #include "swap.h"
 #include "fxttypes.h"
 

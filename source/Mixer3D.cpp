@@ -110,7 +110,7 @@ void Mixer3D::convolution(Complex *input, Complex *filter, Complex *output, long
 
 	for (int i = 0; i < nFFT; i++) {
 		output[i] = fInput[i] * fFilter[i];
-    }
+    }// SIMD?
 	CFFT::Inverse(output, (unsigned int)nFFT);
 }
 
@@ -128,7 +128,7 @@ void Mixer3D::performMix(short *ioDataLeft, short *ioDataRight)
     {
        ioDataLeft[i] = 0;
        ioDataRight[i] = 0;
-    }
+    }// SIMD?
     
     //Iterate through all audio objects, obtain input data and calculate resulting audio data for each object.
     // TODO: Possible bug? Cuts short if one audioObj is inactive?
@@ -149,6 +149,7 @@ void Mixer3D::performMix(short *ioDataLeft, short *ioDataRight)
         iVolume = iAudioObj->getVolume();
         iDistance = player.computeDistanceFrom(iAudioObj) ;
         iAmplitudeFactor = iVolume / iDistance;
+        //iAmplitudeFactor = (iVolume / iDistance) / myWorld->getNumObj();
         
         for(int j = 0; j < bufferSize * 2; j++) {
             if ( j >= bufferSize ) {
@@ -157,7 +158,7 @@ void Mixer3D::performMix(short *ioDataLeft, short *ioDataRight)
             } else {
                 inputAO[j] *= iAmplitudeFactor;
             }
-        }
+        }// SIMD?
        
         if (azimuths[i] != prevAzimuths[i] ||
            elevations[i] != prevElevations[i]) {
@@ -168,7 +169,7 @@ void Mixer3D::performMix(short *ioDataLeft, short *ioDataRight)
             for (int j = filterLength; j < 2 * bufferSize; j++) {
                 ComplexLeftFilter[i][j] = 0;
                 ComplexRightFilter[i][j] = 0;
-            }
+            }// SIMD?
             
             if (azimuths[i] < 0) {
                    azimuths[i] = -azimuths[i];
@@ -184,7 +185,7 @@ void Mixer3D::performMix(short *ioDataLeft, short *ioDataRight)
                     overlapLeft[i][j] = outputLeft[i][j + bufferSize];
                     overlapRight[i][j] = outputRight[i][j + bufferSize];
             }
-        }
+        }// SIMD?
         
         //Perform the convolution of the current input and current filter.
         stereoConvolution(inputAO, ComplexLeftFilter[i], ComplexRightFilter[i], outputLeft[i], outputRight[i], bufferSize, filterLength, 2 * bufferSize);
@@ -193,7 +194,7 @@ void Mixer3D::performMix(short *ioDataLeft, short *ioDataRight)
         for (int j = 0; j < bufferSize; j++) {
             ioDataLeft[j] +=  (short((outputLeft[i][j].real())/2 + (overlapLeft[i][j].real())/2))/myWorld->getNumObj();
             ioDataRight[j] += (short((outputRight[i][j].real())/2 + (overlapRight[i][j].real())/2))/myWorld->getNumObj();
-        }
+        }// SIMD?
         
   
         //Output the data to the output arrays in short integer format. In addition to pushing the output of the main
@@ -201,9 +202,15 @@ void Mixer3D::performMix(short *ioDataLeft, short *ioDataRight)
         //to divide by the number of audio objects to ensure no clipping.
         for (int j = 0; j < bufferSize; j++)
         {
-            ioDataLeft[j]  += (short)( (outputLeft[i][j].real() + overlapLeft[i][j].real()) / 2*myWorld->getNumObj() );
-            ioDataRight[j] += (short)( (outputRight[i][j].real() + overlapRight[i][j].real()) / 2*myWorld->getNumObj() );    
-        }
+            
+            // this one has logical error
+//            ioDataLeft[j]  += (short)( (outputLeft[i][j].real() + overlapLeft[i][j].real()) / 2*myWorld->getNumObj() );
+//            ioDataRight[j] += (short)( (outputRight[i][j].real() + overlapRight[i][j].real()) / 2*myWorld->getNumObj() );
+            
+            // this one does not. 
+            ioDataLeft[j]  += (short)( (outputLeft[i][j].real() + overlapLeft[i][j].real()) / (2*myWorld->getNumObj()) );
+            ioDataRight[j] += (short)( (outputRight[i][j].real() + overlapRight[i][j].real()) / (2*myWorld->getNumObj()) );
+        }// SIMD?
         
         //Updating the overlapInput for the next iteration for the correpsonding obejct
         for (int j = 0; j < bufferSize * 2; j++) {
@@ -212,18 +219,17 @@ void Mixer3D::performMix(short *ioDataLeft, short *ioDataRight)
             } else {
                 overlapInput[j] = inputAO[j];
             }
-        }
+        }// SIMD?
 
         // TODO: If the filter has been changed, didn't we already do this?
         //Updating the default overlap information for the next iteration if the filter won't be changed
         for (int j = 0 ; j < bufferSize; j++) {
             overlapLeft[i][j] = outputLeft[i][j + bufferSize];
             overlapRight[i][j] = outputRight[i][j + bufferSize];
-        }
+        }// SIMD?
     
         //storing the Azimuth value in this iteration for the comparison for the next iteration so that
         //we can know that whether the filter needs to be changed in the next iteration.
         prevAzimuths[i] = azimuths[i];
-        prevElevations[i] = elevations[i];
     }
 }

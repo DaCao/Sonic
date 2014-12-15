@@ -43,8 +43,11 @@ void * World::writeAudioObjects (void* obj) {
         size_t size = objListCurrent->size();
         for (int i=0; i < size ; i++){
             (*objListCurrent)[i]->writeCircBuff();
+            //std::cout << "$$$$$$$     " <<i<<"    $$$$$"<< "\n";
         }
         usleep(10000);
+        //std::cout << "$$$$$$$ da cao $$$$$"<< "\n";
+        
     }
     return NULL;
 }
