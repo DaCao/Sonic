@@ -4,6 +4,7 @@
 #include "World.h"
 #include "mit_hrtf_lib.h"
 #include "complextype.h"
+#include <Accelerate/Accelerate.h>
 
 #ifndef MIXER3D_H
 #define MIXER3D_H
@@ -92,10 +93,13 @@ private:
     
 	Complex	*inputAO, 					 	//Holds the current input of each audio object.
 			*overlapInput,					//Holds the input of the last iteration in case the filter changed and the tail needs recalculation.
-    		*fInput, *fFilter,				//Data arrays to hold frequency domain representation of an input and filter. Used in convolution().
 			**ComplexLeftFilter, **ComplexRightFilter,			 	//Holds the Complex datatype versions of the current filter.
 			**outputLeft, **outputRight, 	//Holds the output of each current input with the current filter.
 			**overlapLeft,**overlapRight;   //Holds the second half of each 2*bufferSize convolution for next iteration.
+    
+    DSPSplitComplex *fInput,
+                    *fFilter, *fOutput;	//Data arrays to hold frequency domain representation of an input and filter. Used in convolution().
+    
 };
 
 #endif

@@ -1,9 +1,11 @@
 #include <math.h>
+#include <cmath>
 #include "../include/Mixer3D.h"
 #include "../include/World.h"
 #include "../include/fft.h"
 #include "../include/mit_hrtf_lib.h"
 #include "../include/complextype.h"
+#include <Accelerate/Accelerate.h>
 
 
 Mixer3D::Mixer3D(int bufSize, int smpRate, int bitD, World *w) :
@@ -11,8 +13,24 @@ myWorld(w), bufferSize(bufSize), sampleRate(smpRate), bitDepth(bitD), player(myW
 {
     inputAO = new Complex[2*bufferSize];
     overlapInput = new Complex[2 * bufferSize];
-    fInput = new Complex[2 * bufferSize];
-    fFilter = new Complex[2 * bufferSize];
+    //fInput = new Complex[2 * bufferSize];   original code
+    //fFilter = new Complex[2 * bufferSize];  original code
+    
+    // code for vDSP
+    // comment out below and uncomment above 2 lines for recover to old version
+    //fInput = new Complex[bufferSize];
+    float outReal[bufferSize];
+    float outImaginary[bufferSize];
+    DSPSplitComplex fInput = {.realp = outReal, .imagp = outImaginary};
+    //fFilter = new Complex[bufferSize];
+    float outReal2[bufferSize];
+    float outImaginary2[bufferSize];
+    DSPSplitComplex fFilter = {.realp = outReal2, .imagp = outImaginary2};
+    //fOutput = new Complex[bufferSize];
+    float outReal3[bufferSize];
+    float outImaginary3[bufferSize];
+    DSPSplitComplex fOutput = {.realp = outReal3, .imagp = outImaginary3};
+    // comment out above
     
     azimuths = new int[World::MAX_OBJ];
     elevations = new int[World::MAX_OBJ];
@@ -105,14 +123,28 @@ void Mixer3D::convolution(Complex *input, Complex *filter, Complex *output, long
 
 	// Perform FFT on both input and filter.
     // TODO: "Streamline" CFFT class?
+    
+    for (int i = 0; i < nFFT; i++){
+        std::cout << i << ": "<< input[i]<< "\n";
+    }
+    
 	CFFT::Forward(input, fInput, (unsigned int)nFFT);
 	CFFT::Forward(filter, fFilter, (unsigned int)nFFT);
-
-	for (int i = 0; i < nFFT; i++) {
-		output[i] = fInput[i] * fFilter[i];
-    }// SIMD?
-	CFFT::Inverse(output, (unsigned int)nFFT);
+    
+	for (int i = 0; i < nFFT/2; i++) {
+        // multiplication of two DSPSplitComplex numbers
+		//fOutput[i] = fInput[i] * fFilter[i];
+        fOutput->realp[i] = (fInput->realp[i] * fFilter->realp[i]) - (fInput->imagp[i] * fFilter->imagp[i]);
+        fOutput->imagp[i] = (fInput->realp[i] * fFilter->imagp[i]) + (fInput->imagp[i] * fFilter->realp[i]);
+    }
+    
+	CFFT::Inverse(fOutput, output, (unsigned int)nFFT);
+    
 }
+
+
+
+
 
 void Mixer3D::stereoConvolution(Complex *input, Complex *leftFilter, Complex *rightFilter, Complex *leftOutput, Complex *rightOutput, long nSIG, long nFIL, long nFFT)
 {

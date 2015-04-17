@@ -11,6 +11,7 @@
 //#include "complex.h"
 #include "complextype.h"
 #include <string>
+#include <Accelerate/Accelerate.h>
 
 class CFFT
 {
@@ -36,7 +37,7 @@ class CFFT
 		//     Input  - input data
 		//     Output - transform result
 		//     N      - length of both input data and result
-		static bool Forward(const Complex *const Input, Complex *const Output, const unsigned int N);
+		static bool Forward(Complex *const Input, DSPSplitComplex *const Output, const unsigned int N);
 	
 		//   FORWARD FOURIER TRANSFORM, INPLACE VERSION
 		//     Data - both input data and output
@@ -48,7 +49,8 @@ class CFFT
 		//     Output - transform result
 		//     N      - length of both input data and result
 		//     Scale  - if to scale result
-		static bool Inverse(const Complex *const Input, Complex *const Output, const unsigned int N, const bool Scale = true);
+		//static bool Inverse(const Complex *const Input, Complex *const Output, const unsigned int N, const bool Scale = true);
+        static bool Inverse(DSPSplitComplex *const Input, Complex *const Output, const unsigned int N);
 	
 		//   INVERSE FOURIER TRANSFORM, INPLACE VERSION
 		//     Data  - both input data and output
