@@ -100,6 +100,10 @@ private:
     DSPSplitComplex *fInput,
                     *fFilter, *fOutput;	//Data arrays to hold frequency domain representation of an input and filter. Used in convolution().
     
+    float *outReal, *outImag, *outReal2, *outImag2, *outReal3, *outImag3;
+    //float *inputAO, *overlapInput;
+    // float **outputLeft, **outputRight,**overlapLeft,**overlapRight;
+    
 };
 
 #endif

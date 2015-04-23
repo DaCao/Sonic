@@ -13,23 +13,39 @@ myWorld(w), bufferSize(bufSize), sampleRate(smpRate), bitDepth(bitD), player(myW
 {
     inputAO = new Complex[2*bufferSize];
     overlapInput = new Complex[2 * bufferSize];
+//    inputAO = new float[2*bufferSize];
+//    overlapInput = new float[2 * bufferSize];
+    
     //fInput = new Complex[2 * bufferSize];   original code
     //fFilter = new Complex[2 * bufferSize];  original code
     
     // code for vDSP
     // comment out below and uncomment above 2 lines for recover to old version
     //fInput = new Complex[bufferSize];
-    float outReal[bufferSize];
-    float outImaginary[bufferSize];
-    DSPSplitComplex fInput = {.realp = outReal, .imagp = outImaginary};
+    
+    //    DSPSplitComplex fInput;
+    //    fInput.realp = new float[bufferSize];
+    //    fInput.imagp = new float[bufferSize];
+    outReal = new float[bufferSize];
+    outImag = new float[bufferSize];
+    fInput = new DSPSplitComplex;
+    fInput->realp = outReal;
+    fInput->imagp = outImag;
+    //DSPSplitComplex fInput = {.realp = outReal, .imagp = outImag};
+    
     //fFilter = new Complex[bufferSize];
-    float outReal2[bufferSize];
-    float outImaginary2[bufferSize];
-    DSPSplitComplex fFilter = {.realp = outReal2, .imagp = outImaginary2};
+    outReal2 = new float[bufferSize];
+    outImag2 = new float[bufferSize];
+    fFilter = new DSPSplitComplex;
+    fFilter->realp = outReal2;
+    fFilter->imagp = outImag2;
+    
     //fOutput = new Complex[bufferSize];
-    float outReal3[bufferSize];
-    float outImaginary3[bufferSize];
-    DSPSplitComplex fOutput = {.realp = outReal3, .imagp = outImaginary3};
+    outReal3 = new float[bufferSize];
+    outImag3 = new float[bufferSize];
+    fOutput = new DSPSplitComplex;
+    fOutput->realp = outReal3;
+    fOutput->imagp = outImag3;
     // comment out above
     
     azimuths = new int[World::MAX_OBJ];
@@ -43,6 +59,11 @@ myWorld(w), bufferSize(bufSize), sampleRate(smpRate), bitDepth(bitD), player(myW
     outputRight = new Complex*[World::MAX_OBJ];
     overlapLeft = new Complex*[World::MAX_OBJ];
     overlapRight = new Complex*[World::MAX_OBJ];
+    //change to type float directly.
+//    outputLeft = new float*[World::MAX_OBJ];
+//    outputRight = new float*[World::MAX_OBJ];
+//    overlapLeft = new float*[World::MAX_OBJ];
+//    overlapRight = new float*[World::MAX_OBJ];
 
     leftFilter = new short[2 * bufferSize];
     rightFilter = new short[2 * bufferSize];
@@ -124,19 +145,34 @@ void Mixer3D::convolution(Complex *input, Complex *filter, Complex *output, long
 	// Perform FFT on both input and filter.
     // TODO: "Streamline" CFFT class?
     
-    for (int i = 0; i < nFFT; i++){
-        std::cout << i << ": "<< input[i]<< "\n";
-    }
+//    for (int i = 0; i < nFFT; i++){
+//        std::cout << i << ": "<< input[i]<< "\n";
+//    }
     
 	CFFT::Forward(input, fInput, (unsigned int)nFFT);
 	CFFT::Forward(filter, fFilter, (unsigned int)nFFT);
+    
+//    for (int i = 0; i < 10; i++){
+//        std::cout <<"check value fInput:" <<fInput->realp[i] << "  "<<fInput->imagp[i]<<"\n";
+//    }
+//
+//    
+//    for (int i = 0; i < 10; i++){
+//        std::cout <<"check value fFilter:" <<fFilter->realp[i] << "  "<<fFilter->imagp[i]<<"\n";
+//    }
+    
     
 	for (int i = 0; i < nFFT/2; i++) {
         // multiplication of two DSPSplitComplex numbers
 		//fOutput[i] = fInput[i] * fFilter[i];
         fOutput->realp[i] = (fInput->realp[i] * fFilter->realp[i]) - (fInput->imagp[i] * fFilter->imagp[i]);
         fOutput->imagp[i] = (fInput->realp[i] * fFilter->imagp[i]) + (fInput->imagp[i] * fFilter->realp[i]);
+        
     }
+    
+//    for (int i = 0; i < 10; i++){
+//        std::cout << i << "th fOutput before inverse: "<< fOutput->realp[i]<<"  " << fOutput->imagp[i] << "\n";
+//    }
     
 	CFFT::Inverse(fOutput, output, (unsigned int)nFFT);
     
@@ -240,8 +276,8 @@ void Mixer3D::performMix(short *ioDataLeft, short *ioDataRight)
 //            ioDataRight[j] += (short)( (outputRight[i][j].real() + overlapRight[i][j].real()) / 2*myWorld->getNumObj() );
             
             // this one does not. 
-            ioDataLeft[j]  += (short)( (outputLeft[i][j].real() + overlapLeft[i][j].real()) / (2*myWorld->getNumObj()) );
-            ioDataRight[j] += (short)( (outputRight[i][j].real() + overlapRight[i][j].real()) / (2*myWorld->getNumObj()) );
+            ioDataLeft[j]  += (short)( (outputLeft[i][j].real() + overlapLeft[i][j].real()) / (20*myWorld->getNumObj()) );
+            ioDataRight[j] += (short)( (outputRight[i][j].real() + overlapRight[i][j].real()) / (20*myWorld->getNumObj()) );
         }// SIMD?
         
         //Updating the overlapInput for the next iteration for the correpsonding obejct
